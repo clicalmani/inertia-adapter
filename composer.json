@@ -1,5 +1,5 @@
 {
-    "name": "inertia/tonka-adapter",
+    "name": "inertiajs/tonka-adapter",
     "description": "Inertia TONKA adapter",
     "type": "library",
     "require": {
