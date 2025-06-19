@@ -114,7 +114,7 @@ class ComponentData
      */
     public static function addError(string $field, string $error_msg) : void
     {
-        if ($request = Request::current() AND $errorBag = $request->input('errorBag')) {
+        if ($request = Request::currentRequest() AND $errorBag = $request->input('errorBag')) {
             static::$errors[$errorBag][$field] = $error_msg;
         } else static::$errors[$field] = $error_msg;
     }
