@@ -5,6 +5,11 @@ use Clicalmani\Foundation\Support\Facades\Facade;
 
 class Inertia extends Facade
 {
+    protected static function getFacadeAccessor(): string
+    {
+        return 'inertia';
+    }
+    
     /**
      * Shared view data
      * 
