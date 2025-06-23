@@ -33,13 +33,13 @@ class Response extends \Clicalmani\Foundation\Http\Response
         return $this->withAddedHeader('X-Inertia', 'true');
     }
 
-    public function withViewData(array $data) : static
+    public function withViewData(array $data) : self
     {
         $this->viewData += $data;
         return $this;
     }
 
-    public function location(string $url) : static
+    public function location(string $url) : self
     {
         $this->componentData = new ComponentData;
         return $this->withHeader('X-Inertia-Location', $url)
@@ -61,8 +61,36 @@ class Response extends \Clicalmani\Foundation\Http\Response
      * @param string $rootView
      * @return void
      */
-    public static function setRootView(string $rootView) : void
+    public function setRootView(string $rootView) : void
     {
         static::$rootView = $rootView;
+    }
+
+    /**
+     * Shared view data
+     * 
+     * @param \Closure $callback
+     * @return void
+     */
+    public function share(\Closure $callback) : void
+    {
+        app()->viewSharedData($callback);
+    }
+
+    public function version(?string $version = null)
+    {
+        if (isset($version)) {
+            ComponentData::setVersion($version);
+        } else return ComponentData::getVersion();
+    }
+
+    public function encryptHistory(bool $encrypt = false) : void
+    {
+        ComponentData::encryptHistory($encrypt);
+    }
+
+    public function clearHistory(bool $clear = false) : void
+    {
+        ComponentData::clearHistory($clear);
     }
 }
