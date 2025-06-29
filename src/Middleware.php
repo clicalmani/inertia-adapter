@@ -3,7 +3,7 @@ namespace Inertia;
 
 use Clicalmani\Foundation\Http\Middlewares\Middleware as BaseMiddleware;
 use Clicalmani\Foundation\Http\RedirectInterface;
-use Clicalmani\Foundation\Http\Requests\RequestInterface;
+use Clicalmani\Foundation\Http\RequestInterface;
 use Clicalmani\Foundation\Http\ResponseInterface;
 use Inertia\Response as InertiaResponse;
 
