@@ -53,7 +53,7 @@ class ComponentData
      */
     public function setComponent(string $name) : void
     {
-        $this->component = $name;
+        $this->component = str_replace('.', '/', $name);
     }
 
     /**
