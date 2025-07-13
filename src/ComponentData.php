@@ -34,6 +34,11 @@ class ComponentData
     private static ?bool $clearHistory = null;
 
     /**
+     * @var array
+     */
+    private static array $errors = [];
+
+    /**
      * Properties
      * 
      * @var array
@@ -110,10 +115,8 @@ class ComponentData
     public static function addError(string $field, string $error_msg) : void
     {
         if ($request = Request::current() AND $errorBag = $request->input('errorBag')) {
-            session()->set("errors.$errorBag.$field", $error_msg);
-        } else {
-            session()->set("errors.$field", $error_msg);
-        }
+            static::$errors[$errorBag][$field] = $error_msg;
+        } else static::$errors[$field] = $error_msg;
     }
 
     public function __toString()
@@ -125,7 +128,7 @@ class ComponentData
     {
         return [
             'component' => $this->component,
-            'props' => $this->props + ['errors' => session()->get('errors') ?? []],
+            'props' => $this->props + ['errors' => self::$errors],
             'url' => client_uri(),
             'version' => self::$version ?? str_shuffle( time() )
         ];
