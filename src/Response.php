@@ -30,7 +30,7 @@ class Response extends \Clicalmani\Foundation\Http\Response
         $this->componentData = new ComponentData;
         $this->componentData->setComponent($component);
         $this->componentData->setProps(array_merge($props, app()->viewSharedData()));
-        return $this->withAddedHeader('X-Inertia', 'true');
+        return $this->withAddedHeader(Support\Header::INERTIA, 'true');
     }
 
     public function withViewData(array $data) : self
@@ -42,7 +42,7 @@ class Response extends \Clicalmani\Foundation\Http\Response
     public function location(string $url) : self
     {
         $this->componentData = new ComponentData;
-        return $this->withHeader('X-Inertia-Location', $url)
+        return $this->withHeader(Support\Header::LOCATION, $url)
                     ->withStatus(409);
     }
 
