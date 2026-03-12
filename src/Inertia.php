@@ -15,6 +15,10 @@ use Clicalmani\Foundation\Support\Facades\Facade;
  */
 class Inertia extends Facade
 {
+    public static $rootDataAttributes = [
+        'page' => '{{ retrieveViewData() }}'
+    ];
+
     protected static function getFacadeAccessor(): string
     {
         return 'inertia';
