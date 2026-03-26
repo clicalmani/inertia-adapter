@@ -19,6 +19,10 @@ class ReactRefresh extends TemplateTag
      */
     public function render(array $matches) : string
     {
+        if ( app()->environment('production') ) {
+            return '';
+        }
+        
         return sprintf(
                 <<<'HTML'
                 <script type="module">
