@@ -10,8 +10,8 @@ class InertiaServiceProvider extends ServiceProvider
         \Clicalmani\Foundation\Resources\Kernel::$template_tags = array_merge(
             \Clicalmani\Foundation\Resources\Kernel::$template_tags,
             [
-                \Inertia\TemplateTags\Inertia::class,
                 \Inertia\TemplateTags\InertiaHead::class,
+                \Inertia\TemplateTags\Inertia::class,
                 \Inertia\TemplateTags\Vite::class,
                 \Inertia\TemplateTags\ReactRefresh::class,
             ]

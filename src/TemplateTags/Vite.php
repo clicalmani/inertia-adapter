@@ -10,15 +10,16 @@ class Vite extends TemplateTag
      * 
      * @var string
      */
-    protected string $tag = '@vite\(([0-9a-zA-Z\'"-_\/\.]+)\)';
+    protected string $tag = '@vite\s*\(\s*(.*)\s*\)';
 
-    /**
-     * Render a tag
-     * 
-     * @return string
-     */
-    public function render() : string
+    public function render(array $matches) : string
     {
-        return '<script type="module" src="' . env('ASSET_URL') . '/{{ strip_quotes($1) }}"></script>';
+        return sprintf(
+                <<<'HTML'
+                <script type="module" src="%s/%s"></script>
+                HTML,
+                env('ASSET_URL'),
+                trim(@$matches[1] ?? '', " '\"")
+            );
     }
 }

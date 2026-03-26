@@ -17,7 +17,7 @@ class InertiaHead extends TemplateTag
      * 
      * @return string
      */
-    public function render() : string
+    public function render(array $matches) : string
     {
         return <<<HEAD
         <title>{{ env('APP_NAME') }}</title>
