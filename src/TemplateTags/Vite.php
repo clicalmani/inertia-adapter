@@ -17,11 +17,7 @@ class Vite extends TemplateTag
         $resource = 'resources/js/' . trim(@$matches[1] ?? 'app.tsx', " '\"");
         $manifestPath = public_path('build/manifest.json');
 
-        // if (! file_exists($manifestPath)) {
-        //     throw new \Exception('Vite manifest not found. Please run "npm run build" to generate the manifest.');
-        // }
-
-        if (file_exists($manifestPath)) { // Production
+        if (app()->environment('production') && file_exists($manifestPath)) { // Production
             $manifest = json_decode(file_get_contents($manifestPath), true);
 
             if (isset($manifest[$resource])) {
@@ -32,19 +28,31 @@ class Vite extends TemplateTag
                 }
 
                 $url = '/build' . $url;
+                $ret = sprintf('<script type="module" src="%s"></script>', $url);
 
-                return sprintf('<script type="module" src="%s"></script>', $url);
+                if (isset($manifest['resources/sass/app.scss'])) {
+                    $ret .= sprintf('<link rel="stylesheet" href="./build/%s">', $manifest['resources/sass/app.scss']);
+                }
+
+                return $ret;
             }
 
             return sprintf('<script type="module" src="%s"></script>', assets($resource));
         }
 
+        $app_style = '';
+
+        if ( is_file(resources_path('/sass/app.scss')) ) {
+            $app_style = sprintf('<link rel="stylesheet" href="%s/%s">', env('ASSET_URL'), 'resources/sass/app.scss');
+        }
+
         return sprintf(
                 <<<'HTML'
-                <script type="module" src="%s/%s"></script>
+                <script type="module" src="%s/%s"></script> %s
                 HTML,
                 env('ASSET_URL'),
-                $resource
+                $resource,
+                $app_style
             );
     }
 }
