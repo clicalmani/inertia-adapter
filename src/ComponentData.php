@@ -129,7 +129,7 @@ class ComponentData
         return [
             'component' => $this->component,
             'props' => $this->props + ['errors' => self::$errors],
-            'url' => client_uri(),
+            'url' => client_url(),
             'version' => self::$version ?? str_shuffle( time() )
         ];
     }
