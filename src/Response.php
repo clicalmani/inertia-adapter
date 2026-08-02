@@ -72,9 +72,9 @@ class Response extends \Clicalmani\Foundation\Http\Response
      * @param \Closure $callback
      * @return void
      */
-    public function share(\Closure $callback) : void
+    public function share(array|\Closure $callback) : void
     {
-        app()->viewSharedData($callback->bindTo(null));
+        app()->viewSharedData(is_array($callback) ? $callback : $callback->bindTo(null));
     }
 
     public function version(?string $version = null)
