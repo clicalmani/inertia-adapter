@@ -1,7 +1,7 @@
 <?php
 namespace Inertia;
 
-use Clicalmani\Foundation\Http\Request;
+use Clicalmani\Core\Http\Request;
 
 class ComponentData
 {

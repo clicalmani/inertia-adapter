@@ -1,7 +1,7 @@
 <?php
 namespace Inertia\TemplateTags;
 
-use Clicalmani\Foundation\Resources\TemplateTag;
+use Clicalmani\Core\Resources\TemplateTag;
 
 class ReactRefresh extends TemplateTag
 {

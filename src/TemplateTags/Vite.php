@@ -1,7 +1,7 @@
 <?php
 namespace Inertia\TemplateTags;
 
-use Clicalmani\Foundation\Resources\TemplateTag;
+use Clicalmani\Core\Resources\TemplateTag;
 
 class Vite extends TemplateTag
 {
@@ -10,49 +10,119 @@ class Vite extends TemplateTag
      * 
      * @var string
      */
-    protected string $tag = '@vite\s*\(\s*(.*)\s*\)';
+    protected string $tag = '@vite\s*\(\s*(.*?)\s*\)';
 
-    public function render(array $matches) : string
+    /**
+     * Render the directive output for Vite assets.
+     *
+     * @param array $matches Matches captured by the template tag regex pattern.
+     * @return string
+     */
+    public function render(array $matches): string
     {
-        $resource = 'resources/js/' . trim(@$matches[1] ?? 'app.tsx', " '\"");
+        $args = $this->parseArgs($matches[1] ?? '');
+
+        if (empty($args)) {
+            $args = ['resources/js/app.tsx'];
+        }
+        
+        $resources = array_map(function (string $arg): string {
+            $arg = trim($arg, " '\"");
+            if (str_starts_with($arg, 'resources/')) {
+                return $arg;
+            }
+            return 'resources/js/' . $arg;
+        }, $args);
+
         $manifestPath = public_path('build/manifest.json');
 
-        if (app()->environment('production') && file_exists($manifestPath)) { // Production
+        if (app()->environment('production') && file_exists($manifestPath)) {
             $manifest = json_decode(file_get_contents($manifestPath), true);
+            $out = '';
 
-            if (isset($manifest[$resource])) {
-                $url = $manifest[$resource]['file'];
-
-                if (!str_starts_with($url, '/')) {
-                    $url = '/' . $url;
+            foreach ($resources as $resource) {
+                if (!isset($manifest[$resource])) {
+                    $out .= sprintf(
+                        '<script type="module" src="%s"></script>',
+                        assets($resource)
+                    );
+                    continue;
                 }
 
-                $url = '/build' . $url;
-                $ret = sprintf('<script type="module" src="%s"></script>', $url);
+                $entry = $manifest[$resource];
 
-                if (isset($manifest['resources/sass/app.scss'])) {
-                    $ret .= sprintf('<link rel="stylesheet" href="./build/%s">', $manifest['resources/sass/app.scss']);
+                // Case 1: Entry is a CSS file -> <link> tag
+                if (str_ends_with($entry['file'], '.css')) {
+                    $out .= sprintf(
+                        '<link rel="stylesheet" href="/build/%s">',
+                        ltrim($entry['file'], '/')
+                    );
+                    continue;
                 }
 
-                return $ret;
+                // Case 2: Entry is a JS file -> <script> tag, plus any associated imported CSS files
+                $url = '/' . ltrim($entry['file'], '/');
+                $out .= sprintf(
+                    '<script type="module" src="/build%s"></script>',
+                    $url
+                );
+
+                foreach ($entry['css'] ?? [] as $css) {
+                    $out .= sprintf(
+                        '<link rel="stylesheet" href="/build/%s">',
+                        ltrim($css, '/')
+                    );
+                }
             }
 
-            return sprintf('<script type="module" src="%s"></script>', assets($resource));
+            return $out;
+        }
+        
+        $assetUrl = rtrim(env('ASSET_URL', ''), '/');
+        $out = '';
+
+        foreach ($resources as $resource) {
+            if (str_ends_with($resource, '.css')) {
+                $out .= sprintf(
+                    '<link rel="stylesheet" href="%s/%s">',
+                    $assetUrl,
+                    $resource
+                );
+            } else {
+                $out .= sprintf(
+                    '<script type="module" src="%s/%s"></script>',
+                    $assetUrl,
+                    $resource
+                );
+            }
         }
 
-        $app_style = '';
+        return $out;
+    }
 
-        if ( is_file(resources_path('/sass/app.scss')) ) {
-            $app_style = sprintf('<link rel="stylesheet" href="%s/%s">', env('ASSET_URL'), 'resources/sass/app.scss');
+    /**
+     * Splits a comma-separated argument string while respecting quoted substrings.
+     *
+     * @param string $raw The raw arguments string.
+     * @return string[] List of parsed arguments.
+     */
+    protected function parseArgs(string $raw): array
+    {
+        $raw = trim($raw);
+
+        if ($raw === '') {
+            return [];
         }
 
-        return sprintf(
-                <<<'HTML'
-                <script type="module" src="%s/%s"></script> %s
-                HTML,
-                env('ASSET_URL'),
-                $resource,
-                $app_style
-            );
+        // preg_split on commas located outside single or double quotes
+        $parts = preg_split(
+            '/\s*,\s*(?=(?:[^\'"]*[\'"][^\'"]*[\'"])*[^\'"]*$)/',
+            $raw
+        );
+
+        return array_values(array_filter(array_map(
+            fn ($p) => trim(trim($p), " '\""),
+            $parts ?: []
+        ), fn ($p) => $p !== ''));
     }
 }

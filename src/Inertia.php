@@ -1,7 +1,7 @@
 <?php
 namespace Inertia;
 
-use Clicalmani\Foundation\Support\Facades\Facade;
+use Clicalmani\Core\Support\Facades\Facade;
 
 /**
  * @method static \Inertia\Response render(string $component, array $props = []) 

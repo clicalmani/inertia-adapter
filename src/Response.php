@@ -1,9 +1,9 @@
 <?php
 namespace Inertia;
 
-use Clicalmani\Foundation\Resources\View;
+use Clicalmani\Core\Resources\View;
 
-class Response extends \Clicalmani\Foundation\Http\Response
+class Response extends \Clicalmani\Core\Http\Response
 {
 
     /**
