@@ -2,6 +2,7 @@
 namespace Inertia;
 
 use Clicalmani\Core\Http\Request;
+use Inertia\Support\Header;
 
 class ComponentData
 {
@@ -56,6 +57,11 @@ class ComponentData
         $this->component = str_replace('.', '/', trim($name, '/'));
     }
 
+    public function getComponent(): string
+    {
+        return $this->component;
+    }
+
     /**
      * Set version
      * 
@@ -64,12 +70,12 @@ class ComponentData
      */
     public static function setVersion(string $version = '1.0') : void
     {
-        self::$version = $version;
+        static::$version = $version;
     }
 
     public static function getVersion() : ?string
     {
-        return self::$version;
+        return static::$version;
     }
 
     /**
@@ -81,6 +87,11 @@ class ComponentData
     public function setProps(array $props) : void
     {
         $this->props += $props;
+    }
+
+    public function getProps(): array
+    {
+        return $this->props;
     }
 
     /**
@@ -114,7 +125,7 @@ class ComponentData
      */
     public static function addError(string $field, string $error_msg) : void
     {
-        if ($request = Request::current() AND $errorBag = $request->input('errorBag')) {
+        if ($request = Request::current() AND $errorBag = $request->getHeaderLine(Header::ERROR_BAG)) {
             static::$errors[$errorBag][$field] = $error_msg;
         } else static::$errors[$field] = $error_msg;
     }
@@ -128,9 +139,36 @@ class ComponentData
     {
         return [
             'component' => $this->component,
-            'props' => $this->props + ['errors' => self::$errors],
-            'url' => client_url(),
-            'version' => self::$version ?? str_shuffle( time() )
+            'props' => $this->resolvePartialProps(),
+            'url' => $_SERVER['REQUEST_URI'] ?? '/',
+            'version' => static::$version
         ];
+    }
+
+    /**
+     * @return array
+     */
+    private function resolvePartialProps() : array
+    {
+        $request = Request::current();
+
+        if (null === $request OR $request->getHeaderLine(Header::PARTIAL_COMPONENT->value) !== $this->component) {
+            return $this->props;
+        }
+
+        $only = array_filter(array_map('trim', explode(',', $request->getHeaderLine(Header::PARTIAL_ONLY->value))));
+
+        if (empty($only) OR empty($only = array_intersect($only, array_keys($this->props)))) {
+            return $this->props;
+        }
+
+        $only = array_flip($only);
+        $except = array_flip(array_filter(array_map('trim', explode(',', $request->getHeaderLine(Header::PARTIAL_EXCEPT->value)))));
+
+        return array_filter(
+            $this->props,
+            fn (string $key) : bool => isset($only[$key]) && ! isset($except[$key]),
+            ARRAY_FILTER_USE_KEY
+        );
     }
 }

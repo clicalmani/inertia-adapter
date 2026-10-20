@@ -5,7 +5,9 @@ use Clicalmani\Core\Providers\ServiceProvider;
 
 class InertiaServiceProvider extends ServiceProvider
 {
-    public function boot(): void
+    public function boot(
+        ?\Clicalmani\Core\Acme\Container $container = null
+    ): void
     {
         \Clicalmani\Core\Resources\Kernel::$template_tags = array_merge(
             \Clicalmani\Core\Resources\Kernel::$template_tags,

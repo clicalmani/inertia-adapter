@@ -32,8 +32,10 @@ class ReactRefresh extends TemplateTag
                     window.$RefreshSig$ = () => (type) => type
                     window.__vite_plugin_react_preamble_installed__ = true
                 </script>
+                <script type="module" src='%s'></script>
                 HTML,
-                env('ASSET_URL') . '/@react-refresh'
+                env('ASSET_URL') . '/@react-refresh',
+                env('ASSET_URL') . '/@vite/client'
             );
     }
 }
