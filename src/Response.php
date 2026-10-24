@@ -2,7 +2,10 @@
 namespace Inertia;
 
 use Clicalmani\Core\Resources\View;
+use Clicalmani\Psr\NonBufferedBody;
 use Inertia\Support\Header;
+use Psr\Http\Message\StreamInterface;
+use Override;
 
 class Response extends \Clicalmani\Core\Http\Response
 {
@@ -50,6 +53,11 @@ class Response extends \Clicalmani\Core\Http\Response
 
     public function __toString()
     {
+        // If the response is a redirect, we don't need to render the component data
+        if (in_array($this->status, [301, 302, 303, 307, 308])) {
+            return '';
+        }
+
         $page = $this->componentData->toArray();
         $isInertia = \Clicalmani\Core\Http\Request::current()?->hasHeader(Header::INERTIA->value);
 
@@ -85,7 +93,10 @@ class Response extends \Clicalmani\Core\Http\Response
         session()->set('__componentData', json_encode($componentData));
         $this->sendStatus();
         $this->sendHeaders();
-        $this->body->write(new View(self::$rootView, ['page' => $componentData] + $this->viewData));
+
+        $content = (new View(self::$rootView, ['page' => $componentData] + $this->viewData))->render();
+        if (!defined('TEST_ENV')) $this->body->write($content);
+        return $content;
     }
 
     public function getComponentData(): ComponentData
@@ -130,5 +141,12 @@ class Response extends \Clicalmani\Core\Http\Response
     public function clearHistory(bool $clear = false) : void
     {
         ComponentData::clearHistory($clear);
+    }
+
+    public function getBody(): StreamInterface
+    {
+        $body = new NonBufferedBody;
+        $body->setContents($this->__toString());
+        return $body;
     }
 }
