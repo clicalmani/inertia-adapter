@@ -5,7 +5,6 @@ use Clicalmani\Core\Resources\View;
 use Clicalmani\Psr\NonBufferedBody;
 use Inertia\Support\Header;
 use Psr\Http\Message\StreamInterface;
-use Override;
 
 class Response extends \Clicalmani\Core\Http\Response
 {

@@ -44,7 +44,7 @@ class Vite extends TemplateTag
                 if (!isset($manifest[$resource])) {
                     $out .= sprintf(
                         '<script type="module" src="%s"></script>',
-                        asset($resource)
+                        assets($resource)
                     );
                     continue;
                 }

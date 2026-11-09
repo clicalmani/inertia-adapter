@@ -151,22 +151,23 @@ class ComponentData
     private function resolvePartialProps() : array
     {
         $request = Request::current();
-
+        $props   = $this->props + (json_decode(session()->get('errors') ?? '', true) ?? []);
+        
         if (null === $request OR $request->getHeaderLine(Header::PARTIAL_COMPONENT->value) !== $this->component) {
-            return $this->props;
+            return $props;
         }
 
         $only = array_filter(array_map('trim', explode(',', $request->getHeaderLine(Header::PARTIAL_ONLY->value))));
 
         if (empty($only) OR empty($only = array_intersect($only, array_keys($this->props)))) {
-            return $this->props;
+            return $props;
         }
 
         $only = array_flip($only);
         $except = array_flip(array_filter(array_map('trim', explode(',', $request->getHeaderLine(Header::PARTIAL_EXCEPT->value)))));
 
         return array_filter(
-            $this->props,
+            $props,
             fn (string $key) : bool => isset($only[$key]) && ! isset($except[$key]),
             ARRAY_FILTER_USE_KEY
         );
